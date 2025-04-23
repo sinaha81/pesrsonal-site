@@ -18,6 +18,9 @@
       --header-text: #ffffff;
       --button-bg: linear-gradient(90deg, #0052D4, #4364F7, #6FB1FC); /* Vibrant blue gradient */
       --button-text: #ffffff;
+      --button-refresh-bg: linear-gradient(135deg, #2ddc7a, #009e4b); /* New vibrant green gradient */
+      --button-refresh-hover-bg: linear-gradient(135deg, #34f08a, #00b356); /* Lighter green on hover */
+      --button-refresh-shadow: 0 5px 15px rgba(0, 158, 75, 0.4);
       --card-bg: #2a2a2a; /* Slightly lighter dark grey for cards */
       --card-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More pronounced shadow for dark */
       --border-color: #333333; /* Darker border */
@@ -33,6 +36,10 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth; /* Smooth scrolling */
     }
 
     body {
@@ -55,6 +62,7 @@
       box-shadow: var(--card-shadow);
       margin: 20px;
       border: 1px solid var(--border-color);
+      padding-bottom: 80px; /* Add padding to bottom to avoid overlap with refresh button */
     }
 
     header {
@@ -85,9 +93,10 @@
     }
 
     .controls {
-      display: grid; /* Using grid for better alignment */
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Responsive grid */
-      gap: 15px; /* Increased gap */
+      display: grid;
+      /* Remove refresh button from this grid calculation */
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
       margin-bottom: 25px;
     }
 
@@ -106,18 +115,6 @@
       background-size: 200% auto; /* For gradient animation */
     }
 
-    .btn:hover {
-      background-position: right center; /* Change gradient direction */
-      filter: brightness(1.15);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .btn:active {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
     #output {
       margin-top: 25px;
       min-height: 150px;
@@ -126,11 +123,23 @@
       padding: 20px;
       background-color: var(--card-bg); /* Card background for output */
       transition: background-color 0.3s ease;
+      overflow: hidden; /* Needed for list item animation */
     }
 
     #output ul {
       list-style-type: none;
       padding: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     #output li {
@@ -140,24 +149,45 @@
       border-radius: 8px;
       box-shadow: 0 3px 6px rgba(0,0,0,0.2);
       border-right: 5px solid var(--loading-color);
-      transition: transform 0.25s ease, background-color 0.25s ease;
+      transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
       color: var(--text-color);
       font-size: 1.05em; /* Slightly larger text */
+      cursor: pointer; /* Indicate clickable */
+      opacity: 0; /* Start hidden for animation */
+      animation: fadeInUp 0.5s ease forwards;
     }
-     #output li:hover {
-         transform: translateX(-6px);
-         background-color: #333; /* Lighter shade on hover */
-         border-right-color: var(--link-color);
-     }
+    /* Stagger animation delay */
+    #output li:nth-child(1) { animation-delay: 0.05s; }
+    #output li:nth-child(2) { animation-delay: 0.1s; }
+    #output li:nth-child(3) { animation-delay: 0.15s; }
+    #output li:nth-child(4) { animation-delay: 0.2s; }
+    #output li:nth-child(5) { animation-delay: 0.25s; }
+    #output li:nth-child(6) { animation-delay: 0.3s; }
+    #output li:nth-child(7) { animation-delay: 0.35s; }
+    #output li:nth-child(8) { animation-delay: 0.4s; }
+    #output li:nth-child(9) { animation-delay: 0.45s; }
+    #output li:nth-child(10) { animation-delay: 0.5s; }
+    /* Add more if needed */
+
+    #output li:hover {
+      transform: translateX(-6px) scale(1.01); /* Slight scale on hover */
+      background-color: #333;
+      border-right-color: var(--link-color);
+    }
 
     #output li.error {
       color: var(--error-color);
       border-right-color: var(--error-color);
       font-weight: bold;
+      cursor: default; /* Not clickable if error */
     }
-     #output li.error span.error { /* Style the specific error span if needed */
-         color: var(--error-color);
-     }
+    #output li.error span.error { /* Style the specific error span if needed */
+      color: var(--error-color);
+    }
+    #output li.error:hover {
+      transform: none; /* Disable hover effect for error items */
+      background-color: var(--secondary-bg);
+    }
 
     /* Styles for Conversion Modal (using SweetAlert now mostly) */
     /* Keep basic modal styles for potential future non-SweetAlert use */
@@ -172,8 +202,8 @@
       border: 1px solid var(--border-color);
       border-radius: 6px;
     }
-     .modal-content input::placeholder { color: var(--text-color-secondary); }
-     .modal-content select option { background-color: var(--primary-bg); color: var(--text-color); }
+    .modal-content input::placeholder { color: var(--text-color-secondary); }
+    .modal-content select option { background-color: var(--primary-bg); color: var(--text-color); }
 
 
     #conversionResult {
@@ -207,6 +237,45 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* New styles for the fixed refresh button container */
+    #refresh-container {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001; /* Ensure it's above other content */
+    }
+
+    #btnRefresh {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%; /* Make it circular */
+      padding: 0; /* Remove padding */
+      display: flex; /* Center the icon */
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8em; /* Adjust icon size */
+      background: var(--button-refresh-bg);
+      color: var(--button-text);
+      box-shadow: var(--button-refresh-shadow);
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+      outline: none;
+    }
+
+    #btnRefresh:hover {
+      background: var(--button-refresh-hover-bg);
+      transform: scale(1.1) translateY(-3px); /* Scale up and lift */
+      box-shadow: 0 8px 20px rgba(0, 158, 75, 0.5); /* Stronger shadow on hover */
+      filter: brightness(1.1);
+    }
+
+     #btnRefresh:active {
+       transform: scale(1.05) translateY(-1px); /* Slightly smaller press effect */
+       box-shadow: 0 4px 10px rgba(0, 158, 75, 0.4);
+     }
+
     /* Responsive Design */
     @media (max-width: 700px) {
       body {
@@ -216,12 +285,13 @@
         margin: 15px;
         padding: 20px;
         border-radius: 10px;
+        padding-bottom: 90px; /* Ensure enough space at bottom */
       }
       header h1 {
         font-size: 1.7em;
       }
       .controls {
-         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
          gap: 12px;
          margin-bottom: 20px;
        }
@@ -229,6 +299,14 @@
         font-size: 1em;
         padding: 12px 15px;
       }
+       #btnRefresh {
+         width: 55px;
+         height: 55px;
+         font-size: 1.6em;
+       }
+       #refresh-container {
+          bottom: 20px;
+        }
        #output li {
          font-size: 1em;
          padding: 12px 15px;
@@ -238,8 +316,22 @@
        body { padding-top: 65px; }
        header h1 { font-size: 1.5em; }
        #update { font-size: 0.8em; }
-       .controls { grid-template-columns: 1fr 1fr; } /* 2 buttons per row */
-       .btn { font-size: 0.95em; padding: 10px 12px; }
+       .controls {
+         grid-template-columns: 1fr 1fr;
+         grid-template-rows: auto auto; /* 2x2 grid */
+         gap: 12px;
+       }
+       #btnRefresh {
+         width: 50px;
+         height: 50px;
+         font-size: 1.5em;
+       }
+       #refresh-container {
+         bottom: 15px;
+       }
+       #root {
+         padding-bottom: 80px;
+       }
      }
 
      /* SweetAlert Dark Theme Adjustments */
@@ -251,6 +343,7 @@
        color: var(--text-color) !important;
        border-radius: 10px !important;
        border: 1px solid var(--border-color);
+       box-shadow: 0 5px 15px rgba(0,0,0,0.5) !important;
      }
      .swal2-title {
        color: var(--text-color) !important;
@@ -270,10 +363,11 @@
        color: var(--button-text) !important;
        border-radius: 20px !important;
        padding: 10px 25px !important;
-        transition: background-color 0.3s ease !important;
+        transition: filter 0.2s ease !important;
+        border: none !important;
      }
      .swal2-confirm:hover {
-        filter: brightness(1.1) !important;
+        filter: brightness(1.15) !important;
      }
      .swal2-cancel {
        background-color: #555 !important;
@@ -281,12 +375,16 @@
         border-radius: 20px !important;
         padding: 10px 25px !important;
         transition: background-color 0.3s ease !important;
+        border: none !important;
      }
       .swal2-cancel:hover {
          background-color: #666 !important;
        }
       .swal2-loader {
          border-color: var(--loading-color) transparent var(--loading-color) transparent !important;
+      }
+      .swal2-success-ring {
+        border-color: rgba(76, 175, 80, 0.7) !important; /* Slightly adjust success indicator */
       }
 
      /* Add Vazirmatn font */
@@ -303,7 +401,7 @@
        font-weight: bold;
        font-style: normal;
        font-display: swap;
-     }
+    }
   </style>
 </head>
 <body>
@@ -324,16 +422,17 @@
     </div>
   </div>
 
-  <!-- Conversion Modal - Structure kept for potential fallback, but SweetAlert will be used -->
-  <div id="conversionModal" class="modal">
-    <!-- Content mostly handled by SweetAlert -->
+  <!-- Refresh Button Container Added at the end -->
+  <div id="refresh-container">
+    <button class="btn" id="btnRefresh" title="رفرش و پاک کردن کش">🔄</button>
   </div>
 
-  <!-- SweetAlert2 JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    const chandeUrl = 'https://cors-anywhere.herokuapp.com/https://chande.net'; // Using CORS proxy
-    const tgjuBaseUrl = 'https://cors-anywhere.herokuapp.com/https://www.tgju.org/profile/'; // Using CORS proxy
+    const chandeUrl = 'https://cors-anywhere.herokuapp.com/https://chande.net';
+    const tgjuBaseUrl = 'https://cors-anywhere.herokuapp.com/https://www.tgju.org/profile/';
+    const CACHE_DURATION_MINUTES = 5; // Cache data for 5 minutes
+    const CACHE_PREFIX = 'chand_cache_';
 
     const currencies = [
       { code: 'usd', title: 'دلار آمریکا', unit: 'تومان', chandeCode: 'USD', tgjuProfile: 'price_dollar_rl' },
@@ -343,12 +442,10 @@
     ];
 
     const additionalAssets = [
-      // Gold
       { title: 'طلا 18 عیار', profile: 'geram18', unit: 'تومان', category: 'gold', needsTomanConversion: true },
       { title: 'انس جهانی طلا', profile: 'ons', unit: 'دلار', category: 'gold', needsTomanConversion: false },
       { title: 'مثقال طلا', profile: 'mesghal', unit: 'تومان', category: 'gold', needsTomanConversion: true },
       { title: 'طلای ۲۴ عیار', profile: 'geram24', unit: 'تومان', category: 'gold', needsTomanConversion: true },
-      // Coins
       { title: 'سکه امامی', profile: 'sekee', unit: 'تومان', category: 'coin', needsTomanConversion: true },
       { title: 'نیم سکه', profile: 'nim', unit: 'تومان', category: 'coin', needsTomanConversion: true },
       { title: 'ربع سکه', profile: 'rob', unit: 'تومان', category: 'coin', needsTomanConversion: true },
@@ -357,18 +454,59 @@
 
     const outputDiv = document.getElementById('output');
     const updateEl = document.getElementById('update');
-    // Removed modal references as SweetAlert handles it now
-    // const conversionModal = document.getElementById('conversionModal');
-    // const sourceCurrencySelect = document.getElementById('sourceCurrency');
-    // const targetCurrencySelect = document.getElementById('targetCurrency');
+    let conversionRatesPromise = null;
+    let lastFetchedCategory = null; // To store the last category fetched ('currency', 'gold', 'coin')
+
+    // --- Caching Functions ---
+    function saveToCache(key, data) {
+        try {
+            const cacheEntry = {
+                timestamp: Date.now(),
+                data: data
+            };
+            localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(cacheEntry));
+        } catch (e) {
+            console.error("Error saving to localStorage", e);
+        }
+    }
+
+    function loadFromCache(key, maxAgeMinutes = CACHE_DURATION_MINUTES) {
+        try {
+            const item = localStorage.getItem(CACHE_PREFIX + key);
+            if (!item) return null;
+
+            const cacheEntry = JSON.parse(item);
+            const ageMillis = Date.now() - cacheEntry.timestamp;
+            if (ageMillis > maxAgeMinutes * 60 * 1000) {
+                localStorage.removeItem(CACHE_PREFIX + key); // Remove expired entry
+                return null;
+            }
+            console.log(`Using cached data for ${key}`);
+            return cacheEntry.data;
+        } catch (e) {
+            console.error("Error loading from localStorage", e);
+            return null;
+        }
+    }
+
+     function clearCache(...keys) {
+         console.log("Clearing cache for keys:", keys);
+         keys.forEach(key => {
+             try {
+                 localStorage.removeItem(CACHE_PREFIX + key);
+             } catch (e) {
+                 console.error(`Error removing ${key} from localStorage`, e);
+             }
+         });
+     }
 
     // --- Helper Functions ---
+
     function convertToToman(price) {
       return typeof price === 'number' && !isNaN(price) ? price / 10 : price;
     }
 
     function formatPrice(price, unit = 'تومان') {
-      // Returns a string, potentially with HTML for error styling
       if (price === 'error' || price === null || typeof price === 'undefined' || isNaN(price)) {
         return `<span class="error">خطا در دریافت</span>`;
       }
@@ -376,12 +514,17 @@
       if (isNaN(number)) {
         return `<span class="error">نامعتبر</span>`;
       }
-      // Use fa-IR for Persian number formatting
       return `${number.toLocaleString('fa-IR')} ${unit}`;
     }
 
+    // Extracts plain text from the list item's HTML for copying
+    function getPlainText(htmlString) {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlString;
+      return tempDiv.textContent || tempDiv.innerText || "";
+    }
+
     function showLoading() {
-      // Keep the simple loader in the output div for background loading
       outputDiv.innerHTML = '<div class="loader"></div><p style="text-align:center; color: var(--text-color-secondary);">در حال بارگذاری...</p>';
     }
 
@@ -392,38 +535,64 @@
         return;
       }
       const ul = document.createElement('ul');
-      let hasError = false;
-      items.forEach(item => {
+      items.forEach((item, index) => { // Add index for animation delay
         const li = document.createElement('li');
-        li.innerHTML = item.label; // Use innerHTML because formatPrice can return HTML spans
+        li.innerHTML = item.label;
+        li.style.animationDelay = `${index * 0.05}s`; // Apply staggered delay
+
         if (item.label.includes('error') || item.label.includes('خطا') || item.label.includes('نامعتبر')) {
           li.classList.add('error');
-          hasError = true;
+        } else {
+          // Add click listener only for valid items
+          li.addEventListener('click', () => handleItemClick(li));
         }
         ul.appendChild(li);
       });
       outputDiv.appendChild(ul);
-
-      // Optionally show a summary error if any item failed
-      // if (hasError) {
-      //     Swal.fire({
-      //         icon: 'warning',
-      //         title: 'توجه',
-      //         text: 'در دریافت برخی قیمت‌ها خطا رخ داده است.',
-      //         timer: 2500,
-      //         showConfirmButton: false
-      //     });
-      // }
     }
 
-    // --- Fetching Functions ---
+    // Function to handle clicking on a list item for copying
+    async function handleItemClick(listItem) {
+      const textToCopy = getPlainText(listItem.innerHTML);
+      if (!textToCopy || !navigator.clipboard) {
+        Swal.fire('خطا', 'امکان کپی کردن وجود ندارد.', 'error');
+        return;
+      }
+
+      try {
+        const result = await Swal.fire({
+          title: 'کپی در کلیپ‌بورد',
+          html: `آیا مایل به کپی کردن متن زیر هستید؟<br><strong style="color: var(--link-color); display: block; margin-top: 10px; direction: ltr; text-align: center;">${textToCopy}</strong>`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'بله، کپی کن',
+          cancelButtonText: 'انصراف',
+          reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+          await navigator.clipboard.writeText(textToCopy);
+          Swal.fire({
+            title: 'کپی شد!',
+            text: 'متن با موفقیت در کلیپ‌بورد کپی شد.',
+            icon: 'success',
+            timer: 1500, // Auto-close timer
+            showConfirmButton: false
+          });
+        }
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+        Swal.fire('خطا', 'کپی کردن متن با مشکل مواجه شد.', 'error');
+      }
+    }
+
+    // --- Fetching Functions --- (Modified for Caching)
 
     async function fetchData(url, options = {}, timeout = 15000) {
       const controller = new AbortController();
       const id = setTimeout(() => controller.abort(), timeout);
       let corsProxyActivated = sessionStorage.getItem('corsProxyActivated');
 
-      // Function to prompt user to activate CORS proxy
       const promptActivateProxy = async () => {
         const result = await Swal.fire({
           title: 'فعال‌سازی دسترسی',
@@ -436,45 +605,29 @@
         });
         if (result.isConfirmed) {
           window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
-          sessionStorage.setItem('corsProxyActivated', 'true'); // Assume activation for next try
-          // Optionally, you could add a small delay or a re-fetch button here
+          sessionStorage.setItem('corsProxyActivated', 'true');
           Swal.fire('دسترسی فعال شد!', 'لطفا دوباره دکمه دریافت قیمت را بزنید.', 'success');
-          return true; // Indicate activation attempt
+          return true;
         }
-        return false; // Indicate cancellation
+        return false;
       };
 
       try {
-        const fetchOptions = {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
-        };
+        const fetchOptions = { ...options, signal: controller.signal, headers: { 'X-Requested-With': 'XMLHttpRequest', 'User-Agent': 'Mozilla/5.0...' } };
         const response = await fetch(url, fetchOptions);
         clearTimeout(id);
         if (!response.ok) {
           console.error(`Fetch error for ${url}: ${response.status} ${response.statusText}`);
-          let errorBody = '';
-          try { errorBody = await response.text(); } catch (e) { /* ignore */ }
-
-          // Specific handling for CORS Proxy 403 Forbidden error
           if (response.status === 403 && url.includes('cors-anywhere')) {
             console.warn(`CORS Proxy issue detected for ${url}.`);
             if (!corsProxyActivated) {
-              const activated = await promptActivateProxy();
-              // Return a specific error type if proxy activation was prompted
+              await promptActivateProxy();
               return { error: true, status: 'cors_proxy_activation_needed', data: null };
             } else {
-              // If already prompted, show a different error
-              Swal.fire('خطای دسترسی', 'فعال‌سازی سرور کمکی ناموفق بود یا دسترسی منقضی شده. لطفا صفحه را رفرش کرده و دوباره تلاش کنید.', 'error');
-              return { error: true, status: response.status, data: null };
+              console.error('CORS Proxy access likely expired or failed.');
+              return { error: true, status: response.status, data: null, corsExpired: true };
             }
           }
-
-          // General fetch error
           return { error: true, status: response.status, data: null };
         }
         const textData = await response.text();
@@ -486,139 +639,242 @@
           return { error: true, data: null, status: 'timeout' };
         }
         console.error(`Network or fetch error for ${url}:`, error);
-        // Avoid showing alert for every single network error, log it instead.
-        // Swal.fire('خطای شبکه', 'اتصال به اینترنت برقرار نیست یا سرور پاسخ نمی‌دهد.', 'error');
         return { error: true, data: null, status: 'network_error' };
       }
     }
 
-    async function fetchPriceFromChande(currencyCode) {
+    async function fetchPriceFromChande(currencyCode, forceRefresh = false) {
+      const cacheKey = `chande_${currencyCode}`;
+      if (!forceRefresh) {
+        const cachedData = loadFromCache(cacheKey);
+        if (cachedData !== null) return cachedData; // Use !== null to allow caching 'error'
+      }
+
       const result = await fetchData(chandeUrl);
-      if (result.error) return 'error'; // Handle specific errors if needed
-      if (!result.data) return 'error';
+      if (result.error) {
+        saveToCache(cacheKey, 'error'); // Cache the error state
+        return result.status === 'cors_proxy_activation_needed' ? 'cors_activation' : 'error';
+      }
+      if (!result.data) {
+        saveToCache(cacheKey, 'error');
+        return 'error';
+      }
 
       try {
         const html = result.data;
-        const regex = new RegExp(`<th[^>]*>\\s*${currencyCode}\\s*<\\/th>.*?<td[^>]*>\\s*([\\d,.]+)\\s*<\\/td>`, 'is');
+        const regex = new RegExp(`<th[^>]*>\s*${currencyCode}\s*<\/th>.*?<td[^>]*>\s*([\d,.]+)\s*<\/td>`, 'is');
         const match = html.match(regex);
-        if (match && match[1]) {
-          return parseInt(match[1].replace(/,/g, ''));
-        } else {
-          console.warn(`Could not find price for ${currencyCode} on Chande.net`);
-          return 'error';
-        }
+        const price = match && match[1] ? parseInt(match[1].replace(/,/g, '')) : 'error';
+        saveToCache(cacheKey, price);
+        return price;
       } catch (e) {
         console.error(`Error parsing Chande.net HTML for ${currencyCode}:`, e);
+        saveToCache(cacheKey, 'error');
         return 'error';
       }
     }
 
-    async function fetchPriceFromTGJU(profile) {
+    async function fetchPriceFromTGJU(profile, forceRefresh = false) {
+      const cacheKey = `tgju_${profile}`;
+      if (!forceRefresh) {
+        const cachedData = loadFromCache(cacheKey);
+        if (cachedData !== null) return cachedData;
+      }
+
       const url = `${tgjuBaseUrl}${profile}`;
       const result = await fetchData(url);
-      // If CORS activation was prompted, stop further processing in this chain
-      if (result.error && result.status === 'cors_proxy_activation_needed') return 'cors_activation';
-      if (result.error || !result.data) return 'error';
+      if (result.error) {
+        saveToCache(cacheKey, 'error');
+        if (result.status === 'cors_proxy_activation_needed') return 'cors_activation';
+        if (result.corsExpired) console.warn(`Skipping TGJU fetch for ${profile} due to potential expired CORS proxy.`);
+        return 'error';
+      }
+      if (!result.data) {
+        saveToCache(cacheKey, 'error');
+        return 'error';
+      }
 
       try {
         const html = result.data;
         const regex = /<td\s+class="text-left"[^>]*>\s*([\d,.]+)\s*<\/td>/i;
         const match = html.match(regex);
-        if (match && match[1]) {
-          const priceInRial = parseFloat(match[1].replace(/,/g, ''));
-          return priceInRial;
-        } else {
-          console.warn(`Could not find price for profile ${profile} on TGJU`);
-          return 'error';
-        }
+        const price = match && match[1] ? parseFloat(match[1].replace(/,/g, '')) : 'error';
+        saveToCache(cacheKey, price);
+        return price;
       } catch (e) {
         console.error(`Error parsing TGJU HTML for ${profile}:`, e);
+        saveToCache(cacheKey, 'error');
         return 'error';
       }
     }
 
-    async function fetchCurrencyPrices() {
-      const results = [];
-      let corsPrompted = false; // Flag to prevent multiple CORS prompts per request chain
-      for (const cur of currencies) {
-        // Fetch Chande price
-        const priceChande = await fetchPriceFromChande(cur.chandeCode);
-        if (priceChande === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
+    async function fetchCurrencyPrices(forceRefresh = false) {
+      const cacheKey = 'currency_prices';
+      if (!forceRefresh) {
+        const cachedData = loadFromCache(cacheKey);
+        if (cachedData) return cachedData;
+      }
 
-        // Fetch TGJU price
+      const results = [];
+      let corsPrompted = false;
+      for (const cur of currencies) {
+        const priceChande = await fetchPriceFromChande(cur.chandeCode, forceRefresh);
+        if (priceChande === 'cors_activation') { corsPrompted = true; break; }
         let priceTGJU = 'error';
         if (cur.tgjuProfile) {
-          priceTGJU = await fetchPriceFromTGJU(cur.tgjuProfile);
-          if (priceTGJU === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
+          priceTGJU = await fetchPriceFromTGJU(cur.tgjuProfile, forceRefresh);
+          if (priceTGJU === 'cors_activation') { corsPrompted = true; break; }
         }
-
         results.push({ label: `${cur.title} (نرخ 1 - Chande): ${formatPrice(priceChande, cur.unit)}` });
-
         if (cur.tgjuProfile) {
           results.push({ label: `${cur.title} (نرخ 2 - TGJU): ${formatPrice( (priceTGJU !== 'error' ? convertToToman(priceTGJU) : 'error'), cur.unit)}` });
         }
       }
-      // If CORS activation was prompted, don't show partial/error data, let the user retry
-      return corsPrompted ? null : results;
+      if (corsPrompted) return null;
+      saveToCache(cacheKey, results);
+      return results;
     }
 
-    async function fetchCurrencyRatesForConversion() {
+    async function fetchCurrencyRatesForConversion(forceRefresh = false) {
+      const cacheKey = 'conversion_rates';
+      if (!forceRefresh) {
+        const cachedData = loadFromCache(cacheKey);
+        if (cachedData && cachedData.error === null) {
+          console.log("Using cached conversion rates.");
+          return cachedData;
+        }
+      }
+
+      console.log("Fetching conversion rates...");
       const rates = {};
       let corsPrompted = false;
+      let fetchSucceeded = false;
       for (const cur of currencies) {
-        const price = await fetchPriceFromChande(cur.chandeCode);
-        if (price === 'cors_activation') { corsPrompted = true; break; }
-        rates[cur.code] = (price === 'error' ? null : price);
+        const price = await fetchPriceFromChande(cur.chandeCode, forceRefresh);
+        if (price === 'cors_activation') {
+          corsPrompted = true;
+          break;
+        }
+        if (price !== 'error') {
+          rates[cur.code] = price;
+          fetchSucceeded = true;
+        } else {
+          rates[cur.code] = null;
+        }
       }
-      return corsPrompted ? null : rates; // Return null if interrupted by CORS prompt
+      console.log("Conversion rates fetched:", rates);
+
+      let result;
+      if (corsPrompted) {
+        result = { rates: null, error: 'cors_activation' };
+      } else if (!fetchSucceeded) {
+        result = { rates: null, error: 'fetch_failed' };
+      } else {
+        result = { rates: rates, error: null };
+      }
+      saveToCache(cacheKey, result);
+      return result;
     }
 
-    async function fetchAssetPrices(category) {
+    async function fetchAssetPrices(category, forceRefresh = false) {
+      const cacheKey = `${category}_prices`;
+      if (!forceRefresh) {
+        const cachedData = loadFromCache(cacheKey);
+        if (cachedData) return cachedData;
+      }
+
       const assets = additionalAssets.filter(a => a.category === category);
       const results = [];
       let corsPrompted = false;
       for (const asset of assets) {
-        const price = await fetchPriceFromTGJU(asset.profile);
-        if (price === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
-
+        const price = await fetchPriceFromTGJU(asset.profile, forceRefresh);
+        if (price === 'cors_activation') { corsPrompted = true; break; }
         let displayPrice = price;
         if (asset.needsTomanConversion && price !== 'error') {
           displayPrice = convertToToman(price);
         }
         results.push({ label: `${asset.title}: ${formatPrice(displayPrice, asset.unit)}` });
       }
-      // If CORS activation was prompted, don't show partial/error data
-      return corsPrompted ? null : results;
+      if (corsPrompted) return null;
+      saveToCache(cacheKey, results);
+      return results;
+    }
+
+    // --- Trigger Fetch Function ---
+    async function triggerFetch(category, forceRefresh = false) {
+      lastFetchedCategory = category; // Store the category being fetched
+      showLoading();
+      let data;
+      switch (category) {
+        case 'currency':
+          data = await fetchCurrencyPrices(forceRefresh);
+          break;
+        case 'gold':
+          data = await fetchAssetPrices('gold', forceRefresh);
+          break;
+        case 'coin':
+          data = await fetchAssetPrices('coin', forceRefresh);
+          break;
+        default:
+          console.error("Invalid category:", category);
+          outputDiv.innerHTML = '<p style="text-align:center; color: var(--error-color);">خطای داخلی: دسته نامعتبر.</p>';
+          return;
+      }
+
+      if (data === null) {
+        outputDiv.innerHTML = '<p style="text-align:center; color: var(--text-color-secondary);">لطفا پس از فعال‌سازی دسترسی، دوباره تلاش کنید.</p>';
+        return;
+      }
+      showOutput(data);
     }
 
     // --- Event Listeners ---
-    document.getElementById('btnCurrency').addEventListener('click', async () => {
-      showLoading();
-      const data = await fetchCurrencyPrices();
-      if (data === null) return; // Stop if CORS activation was prompted
-      showOutput(data);
+
+    document.getElementById('btnCurrency').addEventListener('click', () => triggerFetch('currency'));
+    document.getElementById('btnGold').addEventListener('click', () => triggerFetch('gold'));
+    document.getElementById('btnCoin').addEventListener('click', () => triggerFetch('coin'));
+
+    document.getElementById('btnRefresh').addEventListener('click', () => {
+      console.log("Refresh button clicked.");
+      // Clear all relevant caches
+      clearCache('currency_prices', 'gold_prices', 'coin_prices', 'conversion_rates');
+      // Also clear individual price caches that might exist
+      currencies.forEach(c => clearCache(`chande_${c.chandeCode}`, `tgju_${c.tgjuProfile}`));
+      additionalAssets.forEach(a => clearCache(`tgju_${a.profile}`));
+
+      // Force refresh conversion rates in the background
+      conversionRatesPromise = fetchCurrencyRatesForConversion(true);
+      conversionRatesPromise.catch(err => { console.error("Error during refresh pre-fetch:", err); });
+
+      // If a category was previously viewed, refresh it
+      if (lastFetchedCategory) {
+        console.log("Refreshing last category:", lastFetchedCategory);
+        triggerFetch(lastFetchedCategory, true); // Pass true to force refresh
+      } else {
+        // Otherwise, just clear the output
+        outputDiv.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">کش پاک شد. یک دسته را برای دریافت قیمت‌های جدید انتخاب کنید.</p>';
+      }
+
+      // Give visual feedback
+      Swal.fire({
+        icon: 'info',
+        title: 'رفرش شد',
+        text: 'حافظه پنهان پاک شد و درخواست داده‌های جدید ارسال گردید.',
+        toast: true, // Make it a small toast notification
+        position: 'top-end', // Position at top-right
+        showConfirmButton: false,
+        timer: 2500, // Auto-close after 2.5 seconds
+        timerProgressBar: true
+      });
     });
 
-    document.getElementById('btnGold').addEventListener('click', async () => {
-      showLoading();
-      const data = await fetchAssetPrices('gold');
-      if (data === null) return; // Stop if CORS activation was prompted
-      showOutput(data);
-    });
-
-    document.getElementById('btnCoin').addEventListener('click', async () => {
-      showLoading();
-      const data = await fetchAssetPrices('coin');
-      if (data === null) return; // Stop if CORS activation was prompted
-      showOutput(data);
-    });
-
-    // --- Conversion Logic using SweetAlert ---
     document.getElementById('btnConvert').addEventListener('click', async () => {
-      // Pre-fetch rates slightly ahead of showing the modal for faster calculation later
-      const ratesPromise = fetchCurrencyRatesForConversion();
+      if (!conversionRatesPromise) {
+        console.error("Conversion rates promise not initialized!");
+        Swal.fire('خطا', 'در حال آماده‌سازی نرخ‌ها، لطفا چند لحظه صبر کنید و دوباره تلاش کنید.', 'warning');
+        return;
+      }
 
-      // Prepare options for SweetAlert selects
       const currencyOptions = currencies.reduce((acc, cur) => {
         acc[cur.code] = `${cur.title} (${cur.code.toUpperCase()})`;
         return acc;
@@ -637,78 +893,65 @@
         confirmButtonText: 'محاسبه',
         showCancelButton: true,
         cancelButtonText: 'انصراف',
+        showLoaderOnConfirm: true,
         didOpen: () => {
-          const amountInput = document.getElementById('swal-input-amount');
           const sourceSelect = document.getElementById('swal-select-source');
           const targetSelect = document.getElementById('swal-select-target');
-
-          // Populate selects
           for (const code in currencyOptions) {
             sourceSelect.add(new Option(currencyOptions[code], code));
             targetSelect.add(new Option(currencyOptions[code], code));
           }
-          // Set defaults (e.g., USD to EUR)
           sourceSelect.value = 'usd';
           targetSelect.value = 'eur';
-
-          amountInput.onkeyup = (event) => event.key === 'Enter' && Swal.clickConfirm();
+          document.getElementById('swal-input-amount').onkeyup = (event) => event.key === 'Enter' && Swal.clickConfirm();
         },
-        preConfirm: () => {
-          return {
-            amount: document.getElementById('swal-input-amount').value,
-            source: document.getElementById('swal-select-source').value,
-            target: document.getElementById('swal-select-target').value
-          };
+        preConfirm: async () => {
+          const amount = document.getElementById('swal-input-amount').value;
+          const source = document.getElementById('swal-select-source').value;
+          const target = document.getElementById('swal-select-target').value;
+          const numericAmount = parseFloat(amount);
+
+          if (isNaN(numericAmount) || numericAmount <= 0 || !source || !target) {
+            Swal.showValidationMessage('لطفاً مقدار عددی معتبر و هر دو ارز را انتخاب کنید.');
+            return false;
+          }
+
+          try {
+            // Await the rates promise (might be cached or fetched on load)
+            const ratesResult = await conversionRatesPromise;
+            if (ratesResult.error === 'cors_activation') {
+              Swal.showValidationMessage('لطفا ابتدا دسترسی به سرور کمکی را فعال کرده و دوباره امتحان کنید.');
+              return false;
+            }
+            if (ratesResult.error || !ratesResult.rates) {
+              Swal.showValidationMessage('خطا در دریافت نرخ‌ها. لطفا بعدا تلاش کنید.');
+              return false;
+            }
+            const rates = ratesResult.rates;
+            if (rates[source] === null || rates[target] === null) {
+              Swal.showValidationMessage('نرخ ارز مورد نظر دریافت نشد.');
+              return false;
+            }
+            if (rates[target] === 0) {
+              Swal.showValidationMessage('نرخ ارز مقصد صفر است.');
+              return false;
+            }
+            const result = (numericAmount * rates[source]) / rates[target];
+            return { amount: numericAmount, source, target, result };
+          } catch (error) {
+            console.error("Error during preConfirm rate fetching:", error);
+            Swal.showValidationMessage('خطای غیرمنتظره در دریافت نرخ‌ها.');
+            return false;
+          }
         }
       });
 
       if (formValues) {
-        const { amount, source, target } = formValues;
-        const numericAmount = parseFloat(amount);
-
-        if (isNaN(numericAmount) || numericAmount <= 0 || !source || !target) {
-          Swal.fire({
-            icon: 'error',
-            title: 'ورودی نامعتبر',
-            text: 'لطفاً مقدار عددی معتبر و هر دو ارز مبدا و مقصد را انتخاب کنید.',
-          });
-          return;
-        }
-
-        Swal.showLoading(); // Show loading indicator on the confirm button
-
-        const rates = await ratesPromise; // Get the pre-fetched rates
-
-        if (rates === null) { // Check if CORS prompt interrupted rate fetching
-          Swal.fire({
-            icon: 'info',
-            title: 'نیاز به فعال‌سازی',
-            text: 'لطفا ابتدا دسترسی به سرور کمکی را فعال کنید و سپس دوباره تبدیل ارز را امتحان کنید.',
-          });
-          return;
-        }
-
-        if (rates[source] === null || rates[target] === null) {
-          Swal.fire({
-            icon: 'error',
-            title: 'خطا در دریافت نرخ',
-            text: 'متاسفانه نرخ یک یا هر دو ارز دریافت نشد. لطفا دقایقی دیگر تلاش کنید.',
-          });
-          return;
-        }
-        if (rates[target] === 0) {
-          Swal.fire({ icon: 'error', title: 'خطا', text: 'نرخ ارز مقصد صفر است، امکان محاسبه وجود ندارد.' });
-          return;
-        }
-
-        const result = (numericAmount * rates[source]) / rates[target];
+        const { amount, source, target, result } = formValues;
         const targetCurrencyInfo = currencies.find(c => c.code === target);
         const sourceCurrencyInfo = currencies.find(c => c.code === source);
-
-        // Format the result clearly
-        const formattedAmount = numericAmount.toLocaleString('fa-IR');
-        const formattedResult = result.toLocaleString('fa-IR', { maximumFractionDigits: 2 }); // Limit decimals
-
+        const formattedAmount = amount.toLocaleString('fa-IR');
+        const formattedResult = result.toLocaleString('fa-IR', { maximumFractionDigits: 2 });
         Swal.fire({
           icon: 'success',
           title: 'نتیجه تبدیل',
@@ -743,11 +986,22 @@
       }
     }
 
-    // Initial call and interval
-    updateDateTime();
-    setInterval(updateDateTime, 30000);
+    // --- Initialization ---
+    function initializeApp() {
+      updateDateTime();
+      setInterval(updateDateTime, 30000);
 
-    console.log("Chand Web App Initialized (Dark Mode).");
+      // Start pre-fetching conversion rates (will use cache if available)
+      conversionRatesPromise = fetchCurrencyRatesForConversion();
+      conversionRatesPromise.catch(err => {
+        console.error("Error during initial conversion rate pre-fetch:", err);
+      });
+      console.log("Chand Web App Initialized (Dark Mode, Optimized with Cache).");
+    }
+
+    // Run initialization when the DOM is ready
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
   </script>
 </body>
 </html>
