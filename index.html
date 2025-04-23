@@ -87,10 +87,15 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Stronger shadow */
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       animation: slideDown 0.6s ease-out forwards; /* Header slide down animation */
+      display: flex; /* Use flexbox for alignment */
+      align-items: center;
+      justify-content: space-between; /* Space out elements */
     }
 
     header h1 {
-      margin: 0;
+      flex-grow: 1; /* Allow title to take up space */
+      text-align: center; /* Center title text */
+      margin: 0; /* Reset margin if needed */
       font-size: 2.1em; /* Slightly larger base size */
       font-weight: bold;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
@@ -454,12 +459,136 @@
        font-style: normal;
        font-display: swap;
     }
+
+    /* Settings Button Style */
+    #settingsButton {
+      background: none;
+      border: none;
+      color: var(--header-text);
+      font-size: 1.8em; /* Adjust size */
+      cursor: pointer;
+      padding: 0 15px; /* Add some padding */
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+    #settingsButton:hover {
+      transform: scale(1.1) rotate(15deg);
+      color: var(--link-color);
+    }
+
+    /* --- Settings Modal Styles --- */
+    .modal-overlay {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+      z-index: 1050;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.active {
+      display: flex; /* Show using flex */
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .settings-modal {
+      background-color: var(--secondary-bg);
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      color: var(--text-color);
+      animation: fadeInModal 0.3s ease-out forwards;
+    }
+
+    .settings-modal h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--link-color);
+    }
+
+    .settings-modal label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .settings-modal input[type="url"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border-color);
+      background-color: var(--primary-bg);
+      color: var(--text-color);
+      border-radius: 6px;
+      font-size: 1em;
+      font-family: var(--font-family);
+      direction: ltr; /* Ensure URL input is LTR */
+      text-align: left;
+    }
+    .settings-modal input[type="url"]::placeholder {
+      color: var(--text-color-secondary);
+      text-align: left;
+    }
+
+    .settings-modal .modal-actions {
+      display: flex;
+      justify-content: space-between; /* Space out buttons */
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .settings-modal .modal-actions button {
+      flex-grow: 1; /* Make buttons share space */
+      padding: 12px 20px;
+      font-size: 1em;
+    }
+
+    .settings-modal .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px; /* Positioned to the left for RTL */
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      color: var(--text-color-secondary);
+      cursor: pointer;
+      padding: 5px;
+      line-height: 1;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .settings-modal .modal-close-btn:hover {
+       color: var(--error-color);
+       transform: scale(1.1);
+     }
+     .settings-modal p.note {
+       font-size: 0.9em;
+       color: var(--text-color-secondary);
+       margin-top: 15px;
+       text-align: center;
+     }
   </style>
 </head>
 <body>
   <header>
-    <h1>💵 Chand 💵</h1>
-    <p id="update">در حال بارگذاری تاریخ...</p>
+    <!-- Settings Button Added -->
+    <button id="settingsButton" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
+
+    <h1><i class="fa-solid fa-dollar-sign"></i> Chand <i class="fa-solid fa-dollar-sign"></i></h1>
+
+    <!-- Placeholder for potential future elements on the right -->
+    <div style="width: 40px;"></div> <!-- Adjust width to match settings button approx size -->
   </header>
 
   <div id="root">
@@ -479,23 +608,36 @@
     <button class="btn" id="btnRefresh" title="رفرش و پاک کردن کش">🔄</button>
   </div>
 
+  <!-- Settings Modal Added at the end -->
+  <div id="settingsModalOverlay" class="modal-overlay">
+    <div class="settings-modal">
+      <button class="modal-close-btn" id="closeSettingsModal" title="بستن">&times;</button>
+      <h2><i class="fa-solid fa-sliders"></i> تنظیمات پروکسی</h2>
+      <label for="customProxyInput">آدرس پروکسی CORS سفارشی (اختیاری):</label>
+      <input type="url" id="customProxyInput" placeholder="مثال: https://my-proxy.example.com/">
+      <p class="note">اگر خالی بگذارید، از پروکسی پیش‌فرض استفاده می‌شود. آدرس باید شامل / در انتها باشد.</p>
+      <div class="modal-actions">
+        <button class="btn" id="saveProxyButton"><i class="fa-solid fa-save"></i> ذخیره</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    const chandeUrl = 'https://chande.net'; // Direct URL
-    const tgjuBaseUrl = 'https://www.tgju.org/profile/'; // Direct URL
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Proxy URL
-    const DIRECT_FETCH_TIMEOUT_MS = 4500; // Timeout for direct fetch attempt (slightly less than 5s)
-    const CACHE_DURATION_MINUTES = 5;
-    const CACHE_PREFIX = 'chand_cache_';
+    const chandeUrl = 'https://chande.net';
+    const tgjuBaseUrl = 'https://www.tgju.org/profile/';
+    const DEFAULT_PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+    const CUSTOM_PROXY_STORAGE_KEY = 'customProxyUrl';
+    const DIRECT_FETCH_TIMEOUT_MS = 4500;
 
-    const currencies = [
+const currencies = [
       { code: 'usd', title: 'دلار آمریکا', unit: 'تومان', chandeCode: 'USD', tgjuProfile: 'price_dollar_rl' },
       { code: 'eur', title: 'یورو', unit: 'تومان', chandeCode: 'EUR' , tgjuProfile: 'price_eur'},
       { code: 'gbp', title: 'پوند انگلیس', unit: 'تومان', chandeCode: 'GBP', tgjuProfile: 'price_gbp' },
       { code: 'aed', title: 'درهم امارات', unit: 'تومان', chandeCode: 'AED', tgjuProfile: 'price_aed' }
-    ];
+];
 
-    const additionalAssets = [
+const additionalAssets = [
       { title: 'طلا 18 عیار', profile: 'geram18', unit: 'تومان', category: 'gold', needsTomanConversion: true },
       { title: 'انس جهانی طلا', profile: 'ons', unit: 'دلار', category: 'gold', needsTomanConversion: false },
       { title: 'مثقال طلا', profile: 'mesghal', unit: 'تومان', category: 'gold', needsTomanConversion: true },
@@ -509,54 +651,19 @@
     const outputDiv = document.getElementById('output');
     const updateEl = document.getElementById('update');
     const refreshButton = document.getElementById('btnRefresh');
+    const settingsButton = document.getElementById('settingsButton');
+    const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+    const closeSettingsModalButton = document.getElementById('closeSettingsModal');
+    const customProxyInput = document.getElementById('customProxyInput');
+    const saveProxyButton = document.getElementById('saveProxyButton');
+
     let conversionRatesPromise = null;
     let lastFetchedCategory = null;
-
-    // --- Caching Functions ---
-    function saveToCache(key, data) {
-        try {
-            const cacheEntry = {
-                timestamp: Date.now(),
-                data: data
-            };
-            localStorage.setItem(CACHE_PREFIX + key, JSON.stringify(cacheEntry));
-        } catch (e) {
-            console.error("Error saving to localStorage", e);
-        }
-    }
-
-    function loadFromCache(key, maxAgeMinutes = CACHE_DURATION_MINUTES) {
-        try {
-            const item = localStorage.getItem(CACHE_PREFIX + key);
-            if (!item) return null;
-            const cacheEntry = JSON.parse(item);
-            const ageMillis = Date.now() - cacheEntry.timestamp;
-            if (ageMillis > maxAgeMinutes * 60 * 1000) {
-                localStorage.removeItem(CACHE_PREFIX + key);
-                return null;
-            }
-            console.log(`Using cached data for ${key}`);
-            return cacheEntry.data;
-        } catch (e) {
-            console.error("Error loading from localStorage", e);
-            return null;
-        }
-    }
-
-     function clearCache(...keys) {
-         console.log("Clearing cache for keys:", keys);
-         keys.forEach(key => {
-             try {
-                 localStorage.removeItem(CACHE_PREFIX + key);
-             } catch (e) {
-                 console.error(`Error removing ${key} from localStorage`, e);
-             }
-         });
-     }
+    let currentProxyUrl = DEFAULT_PROXY_URL;
 
     // --- Helper Functions ---
 
-    function convertToToman(price) {
+function convertToToman(price) {
       return typeof price === 'number' && !isNaN(price) ? price / 10 : price;
     }
 
@@ -658,11 +765,12 @@
 
     // Tries direct fetch first, falls back to proxy
     async function fetchDataGuarded(directUrl, options = {}, timeout = 15000) {
-        const proxyUrlResolved = proxyUrl + directUrl; // Construct proxy URL
+        // Use the globally set currentProxyUrl
+        const proxyUrlResolved = currentProxyUrl ? currentProxyUrl + directUrl : null;
         let response;
-        let fetchMethod = 'direct'; // Track which method succeeded
+        let fetchMethod = 'direct';
 
-        // 1. Try Direct Fetch with Timeout
+        // 1. Try Direct Fetch
         try {
             console.log(`Attempting direct fetch: ${directUrl}`);
             const directPromise = baseFetch(directUrl, options, DIRECT_FETCH_TIMEOUT_MS);
@@ -693,7 +801,7 @@
                 response = await baseFetch(proxyUrlResolved, options, timeout); // Use the main timeout for proxy
                  if (!response.ok) {
                      // Handle potential proxy errors (like 403 Forbidden if proxy needs activation)
-                      if (response.status === 403) {
+                      if (response.status === 403 && proxyUrlResolved.includes('cors-anywhere')) {
                          // Handle CORS proxy activation prompt if necessary
                          let corsProxyActivated = sessionStorage.getItem('corsProxyActivated');
                          if (!corsProxyActivated) {
@@ -739,7 +847,7 @@
              allowOutsideClick: false
          });
          if (result.isConfirmed) {
-             window.open(proxyUrl + 'corsdemo', '_blank'); // Use proxyUrl variable
+             window.open(proxyUrlResolved, '_blank'); // Use proxyUrl variable
              sessionStorage.setItem('corsProxyActivated', 'true');
              Swal.fire('دسترسی فعال شد!', 'لطفا دوباره دکمه دریافت قیمت را بزنید.', 'success');
              return true;
@@ -750,18 +858,11 @@
 
     // --- Fetching Specific Prices (Using fetchDataGuarded) ---
 
-    async function fetchPriceFromChande(currencyCode, forceRefresh = false) {
-        const cacheKey = `chande_${currencyCode}`;
-        if (!forceRefresh) {
-            const cachedData = loadFromCache(cacheKey);
-            if (cachedData !== null) return cachedData;
-        }
-
-        const directUrl = `${chandeUrl}`; // Chande doesn't need specific path for main page
+    async function fetchPriceFromChande(currencyCode) {
+        const directUrl = `${chandeUrl}`;
         const result = await fetchDataGuarded(directUrl);
 
         if (result.error) {
-            saveToCache(cacheKey, 'error');
             return result.status === 'cors_proxy_activation_needed' ? 'cors_activation' : 'error';
         }
 
@@ -770,112 +871,79 @@
             const regex = new RegExp(`<th[^>]*>\s*${currencyCode}\s*<\/th>.*?<td[^>]*>\s*([\d,.]+)\s*<\/td>`, 'is');
             const match = html.match(regex);
             const price = match && match[1] ? parseInt(match[1].replace(/,/g, '')) : 'error';
-            saveToCache(cacheKey, price);
             console.log(`Fetched ${currencyCode} via ${result.method}`);
             return price;
         } catch (e) {
             console.error(`Error parsing Chande.net HTML for ${currencyCode}:`, e);
-            saveToCache(cacheKey, 'error');
             return 'error';
         }
     }
 
-    async function fetchPriceFromTGJU(profile, forceRefresh = false) {
-        const cacheKey = `tgju_${profile}`;
-        if (!forceRefresh) {
-            const cachedData = loadFromCache(cacheKey);
-            if (cachedData !== null) return cachedData;
-        }
-
+    async function fetchPriceFromTGJU(profile) {
         const directUrl = `${tgjuBaseUrl}${profile}`;
         const result = await fetchDataGuarded(directUrl);
 
         if (result.error) {
-             saveToCache(cacheKey, 'error');
-             if (result.status === 'cors_proxy_activation_needed') return 'cors_activation';
-             if (result.corsExpired) console.warn(`Skipping TGJU fetch for ${profile} due to potential expired CORS proxy.`);
-             return 'error';
-         }
+            if (result.status === 'cors_proxy_activation_needed') return 'cors_activation';
+            if (result.corsExpired) console.warn(`Skipping TGJU fetch for ${profile} due to potential expired CORS proxy.`);
+            return 'error';
+        }
 
         try {
             const html = result.data;
             const regex = /<td\s+class="text-left"[^>]*>\s*([\d,.]+)\s*<\/td>/i;
             const match = html.match(regex);
             const price = match && match[1] ? parseFloat(match[1].replace(/,/g, '')) : 'error';
-            saveToCache(cacheKey, price);
             console.log(`Fetched ${profile} via ${result.method}`);
             return price;
         } catch (e) {
             console.error(`Error parsing TGJU HTML for ${profile}:`, e);
-            saveToCache(cacheKey, 'error');
             return 'error';
         }
     }
 
     // --- Aggregate Fetching Functions (Using Promise.allSettled) ---
 
-    async function fetchCurrencyPrices(forceRefresh = false) {
-        const cacheKey = 'currency_prices';
-        if (!forceRefresh) {
-            const cachedData = loadFromCache(cacheKey);
-            if (cachedData) return cachedData;
-        }
-
-        console.log(`Fetching currency prices... (Force refresh: ${forceRefresh})`);
+    async function fetchCurrencyPrices() {
+        console.log(`Fetching currency prices...`);
         const promises = currencies.map(cur =>
-            Promise.allSettled([
-                fetchPriceFromChande(cur.chandeCode, forceRefresh),
-                cur.tgjuProfile ? fetchPriceFromTGJU(cur.tgjuProfile, forceRefresh) : Promise.resolve('N/A') // Resolve immediately if no TGJU profile
+            Promise.allSetled([
+                fetchPriceFromChande(cur.chandeCode),
+                cur.tgjuProfile ? fetchPriceFromTGJU(cur.tgjuProfile) : Promise.resolve('N/A')
             ]).then(results => ({ cur, results }))
         );
 
-        const settledResults = await Promise.all(promises); // Wait for all currency pairs
-
+        const settledResults = await Promise.all(promises);
         const finalResults = [];
         let corsPrompted = false;
 
         for (const { cur, results } of settledResults) {
             const [chandeResult, tgjuResult] = results;
-
             const priceChande = chandeResult.status === 'fulfilled' ? chandeResult.value : 'error';
             const priceTGJU = tgjuResult.status === 'fulfilled' ? tgjuResult.value : 'error';
-
             if (priceChande === 'cors_activation' || priceTGJU === 'cors_activation') {
                 corsPrompted = true;
-                break; // Stop processing if CORS activation needed
+                break;
             }
-
             finalResults.push({ label: `${cur.title} (نرخ 1 - Chande): ${formatPrice(priceChande, cur.unit)}` });
             if (cur.tgjuProfile) {
-                 // Handle N/A case for TGJU specifically if it wasn't fetched
-                 const formattedTgju = priceTGJU === 'N/A' ? '<span class="error">ندارد</span>' : formatPrice((priceTGJU !== 'error' ? convertToToman(priceTGJU) : 'error'), cur.unit);
-                 finalResults.push({ label: `${cur.title} (نرخ 2 - TGJU): ${formattedTgju}` });
+                const formattedTgju = priceTGJU === 'N/A' ? '<span class="error">ندارد</span>' : formatPrice((priceTGJU !== 'error' ? convertToToman(priceTGJU) : 'error'), cur.unit);
+                finalResults.push({ label: `${cur.title} (نرخ 2 - TGJU): ${formattedTgju}` });
             }
         }
 
         if (corsPrompted) return null;
-        saveToCache(cacheKey, finalResults);
         return finalResults;
     }
 
-    async function fetchCurrencyRatesForConversion(forceRefresh = false) {
-        const cacheKey = 'conversion_rates';
-        if (!forceRefresh) {
-            const cachedData = loadFromCache(cacheKey);
-            if (cachedData && cachedData.error === null) {
-                console.log("Using cached conversion rates.");
-                return cachedData;
-            }
-        }
-
-        console.log(`Fetching conversion rates... (Force refresh: ${forceRefresh})`);
+    async function fetchCurrencyRatesForConversion() {
+        console.log(`Fetching conversion rates...`);
         const promises = currencies.map(cur =>
-            fetchPriceFromChande(cur.chandeCode, forceRefresh)
-                .then(price => ({ code: cur.code, price })) // Return object with code and price/error
+            fetchPriceFromChande(cur.chandeCode)
+                .then(price => ({ code: cur.code, price }))
         );
 
-        const settledResults = await Promise.allSettled(promises);
-
+        const settledResults = await Promise.allSetled(promises);
         const rates = {};
         let corsPrompted = false;
         let fetchSucceeded = false;
@@ -893,42 +961,27 @@
                 } else {
                     rates[code] = null;
                 }
-            } else {
-                 // Handle case where the fetch promise itself was rejected (less likely now)
-                 console.error("Error in fetchCurrencyRatesForConversion promise:", result.reason);
-                 // Potentially find code based on result.reason if needed, or mark all as potentially failed
-             }
+            } else { console.error("Error in fetchCurrencyRatesForConversion promise:", result.reason); }
         }
 
         let finalResult;
-        if (corsPrompted) {
-            finalResult = { rates: null, error: 'cors_activation' };
-        } else if (!fetchSucceeded) {
-            finalResult = { rates: null, error: 'fetch_failed' };
-        } else {
-            finalResult = { rates: rates, error: null };
-        }
-        saveToCache(cacheKey, finalResult);
+        if (corsPrompted) { finalResult = { rates: null, error: 'cors_activation' }; }
+        else if (!fetchSucceeded) { finalResult = { rates: null, error: 'fetch_failed' }; }
+        else { finalResult = { rates: rates, error: null }; }
+
         console.log("Conversion rates fetch complete:", finalResult);
         return finalResult;
     }
 
-    async function fetchAssetPrices(category, forceRefresh = false) {
-        const cacheKey = `${category}_prices`;
-        if (!forceRefresh) {
-            const cachedData = loadFromCache(cacheKey);
-            if (cachedData) return cachedData;
-        }
-
-        console.log(`Fetching ${category} prices... (Force refresh: ${forceRefresh})`);
+    async function fetchAssetPrices(category) {
+        console.log(`Fetching ${category} prices...`);
         const assets = additionalAssets.filter(a => a.category === category);
         const promises = assets.map(asset =>
-            fetchPriceFromTGJU(asset.profile, forceRefresh)
+            fetchPriceFromTGJU(asset.profile)
                 .then(price => ({ asset, price }))
         );
 
-        const settledResults = await Promise.allSettled(promises);
-
+        const settledResults = await Promise.allSetled(promises);
         const finalResults = [];
         let corsPrompted = false;
 
@@ -944,29 +997,22 @@
                     displayPrice = convertToToman(price);
                 }
                 finalResults.push({ label: `${asset.title}: ${formatPrice(displayPrice, asset.unit)}` });
-            } else {
-                 console.error(`Error fetching asset price ${result.reason?.message || ''}:`, result.reason);
-                 // Find asset based on promise if possible, or add a generic error line
-                 // For simplicity, we might just skip adding a line for rejected fetches here
-                 // Or find the asset based on profile name if the error object contains it (depends on implementation)
-                 // finalResults.push({ label: `خطا در دریافت قیمت (${category})` });
-             }
+            } else { console.error(`Error fetching asset price ${result.reason?.message || ''}:`, result.reason); }
         }
 
         if (corsPrompted) return null;
-        saveToCache(cacheKey, finalResults);
         return finalResults;
     }
 
-    // --- Trigger Fetch Function (remains largely the same, relies on updated fetchers) ---
-    async function triggerFetch(category, forceRefresh = false) {
+    // --- Trigger Fetch Function (Removed forceRefresh parameter) ---
+    async function triggerFetch(category) {
         lastFetchedCategory = category;
         showLoading();
         let dataPromise;
         switch (category) {
-            case 'currency': dataPromise = fetchCurrencyPrices(forceRefresh); break;
-            case 'gold': dataPromise = fetchAssetPrices('gold', forceRefresh); break;
-            case 'coin': dataPromise = fetchAssetPrices('coin', forceRefresh); break;
+            case 'currency': dataPromise = fetchCurrencyPrices(); break;
+            case 'gold': dataPromise = fetchAssetPrices('gold'); break;
+            case 'coin': dataPromise = fetchAssetPrices('coin'); break;
             default:
                 console.error("Invalid category:", category);
                 outputDiv.innerHTML = '<p style="text-align:center; color: var(--error-color);">خطای داخلی: دسته نامعتبر.</p>';
@@ -975,13 +1021,11 @@
 
         try {
             const data = await dataPromise;
-            if (data === null && sessionStorage.getItem('corsProxyActivated')) { // Check if CORS was prompted
+            if (data === null && sessionStorage.getItem('corsProxyActivated')) {
                 outputDiv.innerHTML = '<p style="text-align:center; color: var(--text-color-secondary);">لطفا پس از فعال‌سازی دسترسی، دوباره تلاش کنید.</p>';
                 return;
             }
             if (data === null && !sessionStorage.getItem('corsProxyActivated')){
-                 // Handle case where CORS prompt was needed but not yet confirmed by user
-                 // The promptActivateProxy function handles showing the initial Swal message
                  outputDiv.innerHTML = '<p style="text-align:center; color: var(--text-color-secondary);">نیاز به فعال‌سازی دسترسی به سرور کمکی.</p>';
                  return;
              }
@@ -989,11 +1033,10 @@
         } catch (error) {
             console.error(`Error triggering fetch for ${category}:`, error);
             outputDiv.innerHTML = `<p style="text-align:center; color: var(--error-color);">خطا در بارگذاری داده‌های ${category}.</p>`;
-            // Don't re-throw here unless needed elsewhere
         }
     }
 
-    // --- Event Listeners (Refresh button needs slight modification for async triggerFetch) ---
+    // --- Event Listeners (Refresh button updated) ---
 
     document.getElementById('btnCurrency').addEventListener('click', () => triggerFetch('currency'));
     document.getElementById('btnGold').addEventListener('click', () => triggerFetch('gold'));
@@ -1006,25 +1049,21 @@
         refreshButton.classList.add('loading');
         refreshButton.disabled = true;
 
-        clearCache('currency_prices', 'gold_prices', 'coin_prices', 'conversion_rates');
-        currencies.forEach(c => clearCache(`chande_${c.chandeCode}`, `tgju_${c.tgjuProfile}`));
-        additionalAssets.forEach(a => clearCache(`tgju_${a.profile}`));
-
-        // Force refresh conversion rates in the background
-        conversionRatesPromise = fetchCurrencyRatesForConversion(true);
+        // Force refresh conversion rates in the background (pass true here, though underlying func ignores it now)
+        conversionRatesPromise = fetchCurrencyRatesForConversion();
         conversionRatesPromise.catch(err => { console.error("Error during refresh pre-fetch:", err); });
 
         try {
             if (lastFetchedCategory) {
                 console.log("Refreshing last category:", lastFetchedCategory);
-                await triggerFetch(lastFetchedCategory, true); // Await completion
+                await triggerFetch(lastFetchedCategory);
             } else {
-                outputDiv.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">کش پاک شد. یک دسته را برای دریافت قیمت‌های جدید انتخاب کنید.</p>';
+                outputDiv.innerHTML = '<p style="text-align: center; color: var(--text-color-secondary);">یک دسته را برای دریافت قیمت‌های جدید انتخاب کنید.</p>';
             }
             Swal.fire({
                 icon: 'success',
                 title: 'رفرش شد',
-                text: 'حافظه پنهان پاک شد و درخواست داده‌های جدید ارسال گردید.',
+                text: 'درخواست داده‌های جدید ارسال گردید.',
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
@@ -1049,13 +1088,13 @@
         }
     });
 
-    // ... (Conversion Button Logic remains the same, relies on updated conversionRatesPromise) ...
-    document.getElementById('btnConvert').addEventListener('click', async () => {
+    // ... (Conversion Button Logic remains the same) ...
+  document.getElementById('btnConvert').addEventListener('click', async () => {
       if (!conversionRatesPromise) {
         console.error("Conversion rates promise not initialized!");
         Swal.fire('خطا', 'در حال آماده‌سازی نرخ‌ها، لطفا چند لحظه صبر کنید و دوباره تلاش کنید.', 'warning');
-        return;
-      }
+      return;
+    }
       const currencyOptions = currencies.reduce((acc, cur) => {
         acc[cur.code] = `${cur.title} (${cur.code.toUpperCase()})`;
         return acc;
@@ -1160,15 +1199,94 @@
       }
     }
 
+    // --- Settings Modal Logic ---
+    function openSettingsModal() {
+      // Load current value from storage into input
+      const savedProxy = localStorage.getItem(CUSTOM_PROXY_STORAGE_KEY);
+      customProxyInput.value = savedProxy || ''; // Show saved value or empty
+      settingsModalOverlay.classList.add('active');
+    }
+
+    function closeSettingsModal() {
+      settingsModalOverlay.classList.remove('active');
+    }
+
+    function saveProxyUrl() {
+      let newProxyUrl = customProxyInput.value.trim();
+
+      // Basic validation: Check if empty or looks like a URL (optional but good)
+      if (newProxyUrl && !newProxyUrl.startsWith('http')) {
+        Swal.fire('خطا', 'آدرس پروکسی نامعتبر است. باید با http:// یا https:// شروع شود.', 'error');
+        return;
+      }
+      // Ensure trailing slash if URL is provided
+       if (newProxyUrl && !newProxyUrl.endsWith('/')) {
+           newProxyUrl += '/';
+           customProxyInput.value = newProxyUrl; // Update input visually
+       }
+
+      // Save to localStorage (save empty string if cleared)
+      localStorage.setItem(CUSTOM_PROXY_STORAGE_KEY, newProxyUrl);
+
+      // Update the global variable immediately
+      currentProxyUrl = newProxyUrl || DEFAULT_PROXY_URL;
+      console.log("Proxy URL updated to:", currentProxyUrl);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'ذخیره شد',
+        text: newProxyUrl ? 'آدرس پروکسی سفارشی ذخیره شد.' : 'پروکسی سفارشی پاک شد، از پیش‌فرض استفاده می‌شود.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      closeSettingsModal();
+   }
+
+    // --- Event Listeners ---
+    settingsButton.addEventListener('click', openSettingsModal);
+    closeSettingsModalButton.addEventListener('click', closeSettingsModal);
+    saveProxyButton.addEventListener('click', saveProxyUrl);
+    // Close modal if clicking overlay (outside the modal content)
+    settingsModalOverlay.addEventListener('click', (event) => {
+      if (event.target === settingsModalOverlay) {
+        closeSettingsModal();
+      }
+    });
+
+    // ... (Other event listeners: btnCurrency, btnGold, btnCoin, btnRefresh, btnConvert) ...
+
+    // ... (Date/Time Update Logic remains the same) ...
+    function updateDateTime() {
+      try {
+        const now = new Date();
+        const persianDate = now.toLocaleDateString('fa-IR-u-nu-latn', {
+          timeZone: 'Asia/Tehran', year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const time = now.toLocaleTimeString('fa-IR-u-nu-latn', {
+          timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', hour12: false
+        });
+        updateEl.textContent = `آخرین بروزرسانی: ${persianDate} - ${time}`;
+      } catch (e) {
+        console.error("Error updating date/time:", e);
+        updateEl.textContent = "خطا در بروزرسانی زمان";
+      }
+    }
+
     // ... (Initialization Logic remains the same) ...
     function initializeApp() {
+      const savedProxy = localStorage.getItem(CUSTOM_PROXY_STORAGE_KEY);
+      currentProxyUrl = savedProxy || DEFAULT_PROXY_URL;
+      console.log("Initialized with Proxy URL:", currentProxyUrl);
+
       updateDateTime();
       setInterval(updateDateTime, 30000);
+
       conversionRatesPromise = fetchCurrencyRatesForConversion();
       conversionRatesPromise.catch(err => {
         console.error("Error during initial conversion rate pre-fetch:", err);
       });
-      console.log("Chand Web App Initialized (Dark Mode, Optimized with Cache, Parallel Fetch).");
+      console.log("Chand Web App Initialized (Dark Mode, Optimized, Parallel, Custom Proxy, No Caching).");
     }
     document.addEventListener('DOMContentLoaded', initializeApp);
 
