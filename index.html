@@ -1,0 +1,753 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اپ Chand روی وب - مدرن</title>
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    :root {
+      /* Dark Theme Palette */
+      --primary-bg: #121212; /* Very dark grey (almost black) */
+      --secondary-bg: #1e1e1e; /* Dark grey */
+      --text-color: #e0e0e0; /* Light grey for text */
+      --text-color-secondary: #b3b3b3; /* Slightly dimmer text */
+      --header-bg: linear-gradient(90deg, #0f2027, #203a43, #2c5364); /* Dark blue/grey gradient */
+      --header-text: #ffffff;
+      --button-bg: linear-gradient(90deg, #0052D4, #4364F7, #6FB1FC); /* Vibrant blue gradient */
+      --button-text: #ffffff;
+      --card-bg: #2a2a2a; /* Slightly lighter dark grey for cards */
+      --card-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* More pronounced shadow for dark */
+      --border-color: #333333; /* Darker border */
+      --link-color: #6FB1FC; /* Brighter link color */
+      --loading-color: #4364F7; /* Blue loading indicator */
+      --error-color: #ff6b6b; /* Softer red for errors */
+      --success-color: #4CAF50; /* Green for success */
+      --font-family: 'Vazirmatn', sans-serif;
+    }
+
+    /* Simple CSS Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--primary-bg);
+      color: var(--text-color);
+      line-height: 1.7; /* Slightly increased line height */
+      display: flex;
+      justify-content: center;
+      padding-top: 80px; /* Increased Space for fixed header */
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #root {
+      width: 100%;
+      max-width: 750px; /* Slightly wider */
+      padding: 25px;
+      background-color: var(--secondary-bg);
+      border-radius: 12px; /* More rounded corners */
+      box-shadow: var(--card-shadow);
+      margin: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 18px 20px; /* Slightly taller header */
+      text-align: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Stronger shadow */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2em; /* Larger title */
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    #update {
+      font-size: 0.9em;
+      margin-top: 8px;
+      color: var(--text-color-secondary);
+    }
+
+    .controls {
+      display: grid; /* Using grid for better alignment */
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Responsive grid */
+      gap: 15px; /* Increased gap */
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      padding: 14px 20px; /* Larger buttons */
+      border: none;
+      border-radius: 30px; /* Fully rounded buttons */
+      font-size: 1.05em; /* Slightly larger font */
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background-size: 200% auto; /* For gradient animation */
+    }
+
+    .btn:hover {
+      background-position: right center; /* Change gradient direction */
+      filter: brightness(1.15);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #output {
+      margin-top: 25px;
+      min-height: 150px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      background-color: var(--card-bg); /* Card background for output */
+      transition: background-color 0.3s ease;
+    }
+
+    #output ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #output li {
+      background: var(--secondary-bg); /* Darker background for list items */
+      margin-bottom: 12px;
+      padding: 15px 18px;
+      border-radius: 8px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      border-right: 5px solid var(--loading-color);
+      transition: transform 0.25s ease, background-color 0.25s ease;
+      color: var(--text-color);
+      font-size: 1.05em; /* Slightly larger text */
+    }
+     #output li:hover {
+         transform: translateX(-6px);
+         background-color: #333; /* Lighter shade on hover */
+         border-right-color: var(--link-color);
+     }
+
+    #output li.error {
+      color: var(--error-color);
+      border-right-color: var(--error-color);
+      font-weight: bold;
+    }
+     #output li.error span.error { /* Style the specific error span if needed */
+         color: var(--error-color);
+     }
+
+    /* Styles for Conversion Modal (using SweetAlert now mostly) */
+    /* Keep basic modal styles for potential future non-SweetAlert use */
+    .modal { display: none; /* Hidden by default, SweetAlert handles visibility */ }
+    .modal-content { background-color: var(--secondary-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+    .close-btn { color: #aaa; }
+    .close-btn:hover, .close-btn:focus { color: var(--text-color); }
+    .modal-content label { color: var(--text-color); }
+    .modal-content input[type="number"], .modal-content select {
+      background-color: var(--primary-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+     .modal-content input::placeholder { color: var(--text-color-secondary); }
+     .modal-content select option { background-color: var(--primary-bg); color: var(--text-color); }
+
+
+    #conversionResult {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.1em;
+      text-align: center;
+      padding: 12px;
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      color: var(--success-color);
+    }
+    #conversionResult.error {
+       color: var(--error-color);
+     }
+
+    /* Loading Spinner */
+    .loader {
+      border: 6px solid #444; /* Darker base */
+      border-top: 6px solid var(--loading-color); /* Brighter top */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 25px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 700px) {
+      body {
+        padding-top: 70px;
+      }
+      #root {
+        margin: 15px;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      header h1 {
+        font-size: 1.7em;
+      }
+      .controls {
+         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+         gap: 12px;
+         margin-bottom: 20px;
+       }
+      .btn {
+        font-size: 1em;
+        padding: 12px 15px;
+      }
+       #output li {
+         font-size: 1em;
+         padding: 12px 15px;
+       }
+    }
+    @media (max-width: 480px) {
+       body { padding-top: 65px; }
+       header h1 { font-size: 1.5em; }
+       #update { font-size: 0.8em; }
+       .controls { grid-template-columns: 1fr 1fr; } /* 2 buttons per row */
+       .btn { font-size: 0.95em; padding: 10px 12px; }
+     }
+
+     /* SweetAlert Dark Theme Adjustments */
+     body.swal2-shown > [aria-hidden="true"] {
+       filter: blur(3px); /* Blur background when modal is open */
+     }
+     .swal2-popup {
+       background: var(--secondary-bg) !important;
+       color: var(--text-color) !important;
+       border-radius: 10px !important;
+       border: 1px solid var(--border-color);
+     }
+     .swal2-title {
+       color: var(--text-color) !important;
+     }
+     .swal2-html-container {
+        color: var(--text-color-secondary) !important;
+     }
+     .swal2-input, .swal2-select {
+       background: var(--primary-bg) !important;
+       color: var(--text-color) !important;
+       border: 1px solid var(--border-color) !important;
+     }
+      .swal2-input::placeholder { color: var(--text-color-secondary) !important; }
+     .swal2-confirm {
+       background: var(--button-bg) !important;
+       background-image: var(--button-bg) !important; /* Ensure gradient applies */
+       color: var(--button-text) !important;
+       border-radius: 20px !important;
+       padding: 10px 25px !important;
+        transition: background-color 0.3s ease !important;
+     }
+     .swal2-confirm:hover {
+        filter: brightness(1.1) !important;
+     }
+     .swal2-cancel {
+       background-color: #555 !important;
+       color: var(--button-text) !important;
+        border-radius: 20px !important;
+        padding: 10px 25px !important;
+        transition: background-color 0.3s ease !important;
+     }
+      .swal2-cancel:hover {
+         background-color: #666 !important;
+       }
+      .swal2-loader {
+         border-color: var(--loading-color) transparent var(--loading-color) transparent !important;
+      }
+
+     /* Add Vazirmatn font */
+     @font-face {
+       font-family: 'Vazirmatn';
+       src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
+       font-weight: normal;
+       font-style: normal;
+       font-display: swap;
+     }
+     @font-face {
+       font-family: 'Vazirmatn';
+       src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
+       font-weight: bold;
+       font-style: normal;
+       font-display: swap;
+     }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💵 Chand 💵</h1>
+    <p id="update">در حال بارگذاری تاریخ...</p>
+  </header>
+
+  <div id="root">
+    <div class="controls">
+      <button class="btn" id="btnCurrency">ارزها 💵</button>
+      <button class="btn" id="btnGold">قیمت طلا 🪙</button>
+      <button class="btn" id="btnCoin">قیمت سکه 💰</button>
+      <button class="btn" id="btnConvert">تبدیل ارز 💱</button>
+    </div>
+    <div id="output">
+      <p style="text-align: center; color: var(--text-color-secondary);">برای مشاهده قیمت‌ها، یکی از دکمه‌های بالا را انتخاب کنید.</p>
+    </div>
+  </div>
+
+  <!-- Conversion Modal - Structure kept for potential fallback, but SweetAlert will be used -->
+  <div id="conversionModal" class="modal">
+    <!-- Content mostly handled by SweetAlert -->
+  </div>
+
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    const chandeUrl = 'https://cors-anywhere.herokuapp.com/https://chande.net'; // Using CORS proxy
+    const tgjuBaseUrl = 'https://cors-anywhere.herokuapp.com/https://www.tgju.org/profile/'; // Using CORS proxy
+
+    const currencies = [
+      { code: 'usd', title: 'دلار آمریکا', unit: 'تومان', chandeCode: 'USD', tgjuProfile: 'price_dollar_rl' },
+      { code: 'eur', title: 'یورو', unit: 'تومان', chandeCode: 'EUR' , tgjuProfile: 'price_eur'},
+      { code: 'gbp', title: 'پوند انگلیس', unit: 'تومان', chandeCode: 'GBP', tgjuProfile: 'price_gbp' },
+      { code: 'aed', title: 'درهم امارات', unit: 'تومان', chandeCode: 'AED', tgjuProfile: 'price_aed' }
+    ];
+
+    const additionalAssets = [
+      // Gold
+      { title: 'طلا 18 عیار', profile: 'geram18', unit: 'تومان', category: 'gold', needsTomanConversion: true },
+      { title: 'انس جهانی طلا', profile: 'ons', unit: 'دلار', category: 'gold', needsTomanConversion: false },
+      { title: 'مثقال طلا', profile: 'mesghal', unit: 'تومان', category: 'gold', needsTomanConversion: true },
+      { title: 'طلای ۲۴ عیار', profile: 'geram24', unit: 'تومان', category: 'gold', needsTomanConversion: true },
+      // Coins
+      { title: 'سکه امامی', profile: 'sekee', unit: 'تومان', category: 'coin', needsTomanConversion: true },
+      { title: 'نیم سکه', profile: 'nim', unit: 'تومان', category: 'coin', needsTomanConversion: true },
+      { title: 'ربع سکه', profile: 'rob', unit: 'تومان', category: 'coin', needsTomanConversion: true },
+      { title: 'سکه گرمی', profile: 'gerami', unit: 'تومان', category: 'coin', needsTomanConversion: true }
+    ];
+
+    const outputDiv = document.getElementById('output');
+    const updateEl = document.getElementById('update');
+    // Removed modal references as SweetAlert handles it now
+    // const conversionModal = document.getElementById('conversionModal');
+    // const sourceCurrencySelect = document.getElementById('sourceCurrency');
+    // const targetCurrencySelect = document.getElementById('targetCurrency');
+
+    // --- Helper Functions ---
+    function convertToToman(price) {
+      return typeof price === 'number' && !isNaN(price) ? price / 10 : price;
+    }
+
+    function formatPrice(price, unit = 'تومان') {
+      // Returns a string, potentially with HTML for error styling
+      if (price === 'error' || price === null || typeof price === 'undefined' || isNaN(price)) {
+        return `<span class="error">خطا در دریافت</span>`;
+      }
+      const number = Number(price);
+      if (isNaN(number)) {
+        return `<span class="error">نامعتبر</span>`;
+      }
+      // Use fa-IR for Persian number formatting
+      return `${number.toLocaleString('fa-IR')} ${unit}`;
+    }
+
+    function showLoading() {
+      // Keep the simple loader in the output div for background loading
+      outputDiv.innerHTML = '<div class="loader"></div><p style="text-align:center; color: var(--text-color-secondary);">در حال بارگذاری...</p>';
+    }
+
+    function showOutput(items) {
+      outputDiv.innerHTML = ''; // Clear previous content
+      if (!items || items.length === 0) {
+        outputDiv.innerHTML = '<p style="text-align:center; color: var(--text-color-secondary);">داده‌ای برای نمایش وجود ندارد.</p>';
+        return;
+      }
+      const ul = document.createElement('ul');
+      let hasError = false;
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = item.label; // Use innerHTML because formatPrice can return HTML spans
+        if (item.label.includes('error') || item.label.includes('خطا') || item.label.includes('نامعتبر')) {
+          li.classList.add('error');
+          hasError = true;
+        }
+        ul.appendChild(li);
+      });
+      outputDiv.appendChild(ul);
+
+      // Optionally show a summary error if any item failed
+      // if (hasError) {
+      //     Swal.fire({
+      //         icon: 'warning',
+      //         title: 'توجه',
+      //         text: 'در دریافت برخی قیمت‌ها خطا رخ داده است.',
+      //         timer: 2500,
+      //         showConfirmButton: false
+      //     });
+      // }
+    }
+
+    // --- Fetching Functions ---
+
+    async function fetchData(url, options = {}, timeout = 15000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      let corsProxyActivated = sessionStorage.getItem('corsProxyActivated');
+
+      // Function to prompt user to activate CORS proxy
+      const promptActivateProxy = async () => {
+        const result = await Swal.fire({
+          title: 'فعال‌سازی دسترسی',
+          html: `برای دریافت قیمت‌ها، نیاز به فعال‌سازی دسترسی به سرور کمکی (CORS Proxy) است.<br>لطفا روی دکمه زیر کلیک کنید و سپس دکمه "Request temporary access to the demo server" را در صفحه باز شده بزنید و به این صفحه برگردید.`,
+          icon: 'info',
+          confirmButtonText: 'فعال‌سازی دسترسی',
+          showCancelButton: true,
+          cancelButtonText: 'انصراف',
+          allowOutsideClick: false
+        });
+        if (result.isConfirmed) {
+          window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+          sessionStorage.setItem('corsProxyActivated', 'true'); // Assume activation for next try
+          // Optionally, you could add a small delay or a re-fetch button here
+          Swal.fire('دسترسی فعال شد!', 'لطفا دوباره دکمه دریافت قیمت را بزنید.', 'success');
+          return true; // Indicate activation attempt
+        }
+        return false; // Indicate cancellation
+      };
+
+      try {
+        const fetchOptions = {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        };
+        const response = await fetch(url, fetchOptions);
+        clearTimeout(id);
+        if (!response.ok) {
+          console.error(`Fetch error for ${url}: ${response.status} ${response.statusText}`);
+          let errorBody = '';
+          try { errorBody = await response.text(); } catch (e) { /* ignore */ }
+
+          // Specific handling for CORS Proxy 403 Forbidden error
+          if (response.status === 403 && url.includes('cors-anywhere')) {
+            console.warn(`CORS Proxy issue detected for ${url}.`);
+            if (!corsProxyActivated) {
+              const activated = await promptActivateProxy();
+              // Return a specific error type if proxy activation was prompted
+              return { error: true, status: 'cors_proxy_activation_needed', data: null };
+            } else {
+              // If already prompted, show a different error
+              Swal.fire('خطای دسترسی', 'فعال‌سازی سرور کمکی ناموفق بود یا دسترسی منقضی شده. لطفا صفحه را رفرش کرده و دوباره تلاش کنید.', 'error');
+              return { error: true, status: response.status, data: null };
+            }
+          }
+
+          // General fetch error
+          return { error: true, status: response.status, data: null };
+        }
+        const textData = await response.text();
+        return { error: false, data: textData };
+      } catch (error) {
+        clearTimeout(id);
+        if (error.name === 'AbortError') {
+          console.error(`Fetch timed out for ${url}`);
+          return { error: true, data: null, status: 'timeout' };
+        }
+        console.error(`Network or fetch error for ${url}:`, error);
+        // Avoid showing alert for every single network error, log it instead.
+        // Swal.fire('خطای شبکه', 'اتصال به اینترنت برقرار نیست یا سرور پاسخ نمی‌دهد.', 'error');
+        return { error: true, data: null, status: 'network_error' };
+      }
+    }
+
+    async function fetchPriceFromChande(currencyCode) {
+      const result = await fetchData(chandeUrl);
+      if (result.error) return 'error'; // Handle specific errors if needed
+      if (!result.data) return 'error';
+
+      try {
+        const html = result.data;
+        const regex = new RegExp(`<th[^>]*>\\s*${currencyCode}\\s*<\\/th>.*?<td[^>]*>\\s*([\\d,.]+)\\s*<\\/td>`, 'is');
+        const match = html.match(regex);
+        if (match && match[1]) {
+          return parseInt(match[1].replace(/,/g, ''));
+        } else {
+          console.warn(`Could not find price for ${currencyCode} on Chande.net`);
+          return 'error';
+        }
+      } catch (e) {
+        console.error(`Error parsing Chande.net HTML for ${currencyCode}:`, e);
+        return 'error';
+      }
+    }
+
+    async function fetchPriceFromTGJU(profile) {
+      const url = `${tgjuBaseUrl}${profile}`;
+      const result = await fetchData(url);
+      // If CORS activation was prompted, stop further processing in this chain
+      if (result.error && result.status === 'cors_proxy_activation_needed') return 'cors_activation';
+      if (result.error || !result.data) return 'error';
+
+      try {
+        const html = result.data;
+        const regex = /<td\s+class="text-left"[^>]*>\s*([\d,.]+)\s*<\/td>/i;
+        const match = html.match(regex);
+        if (match && match[1]) {
+          const priceInRial = parseFloat(match[1].replace(/,/g, ''));
+          return priceInRial;
+        } else {
+          console.warn(`Could not find price for profile ${profile} on TGJU`);
+          return 'error';
+        }
+      } catch (e) {
+        console.error(`Error parsing TGJU HTML for ${profile}:`, e);
+        return 'error';
+      }
+    }
+
+    async function fetchCurrencyPrices() {
+      const results = [];
+      let corsPrompted = false; // Flag to prevent multiple CORS prompts per request chain
+      for (const cur of currencies) {
+        // Fetch Chande price
+        const priceChande = await fetchPriceFromChande(cur.chandeCode);
+        if (priceChande === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
+
+        // Fetch TGJU price
+        let priceTGJU = 'error';
+        if (cur.tgjuProfile) {
+          priceTGJU = await fetchPriceFromTGJU(cur.tgjuProfile);
+          if (priceTGJU === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
+        }
+
+        results.push({ label: `${cur.title} (نرخ 1 - Chande): ${formatPrice(priceChande, cur.unit)}` });
+
+        if (cur.tgjuProfile) {
+          results.push({ label: `${cur.title} (نرخ 2 - TGJU): ${formatPrice( (priceTGJU !== 'error' ? convertToToman(priceTGJU) : 'error'), cur.unit)}` });
+        }
+      }
+      // If CORS activation was prompted, don't show partial/error data, let the user retry
+      return corsPrompted ? null : results;
+    }
+
+    async function fetchCurrencyRatesForConversion() {
+      const rates = {};
+      let corsPrompted = false;
+      for (const cur of currencies) {
+        const price = await fetchPriceFromChande(cur.chandeCode);
+        if (price === 'cors_activation') { corsPrompted = true; break; }
+        rates[cur.code] = (price === 'error' ? null : price);
+      }
+      return corsPrompted ? null : rates; // Return null if interrupted by CORS prompt
+    }
+
+    async function fetchAssetPrices(category) {
+      const assets = additionalAssets.filter(a => a.category === category);
+      const results = [];
+      let corsPrompted = false;
+      for (const asset of assets) {
+        const price = await fetchPriceFromTGJU(asset.profile);
+        if (price === 'cors_activation') { corsPrompted = true; break; } // Stop if CORS prompt shown
+
+        let displayPrice = price;
+        if (asset.needsTomanConversion && price !== 'error') {
+          displayPrice = convertToToman(price);
+        }
+        results.push({ label: `${asset.title}: ${formatPrice(displayPrice, asset.unit)}` });
+      }
+      // If CORS activation was prompted, don't show partial/error data
+      return corsPrompted ? null : results;
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('btnCurrency').addEventListener('click', async () => {
+      showLoading();
+      const data = await fetchCurrencyPrices();
+      if (data === null) return; // Stop if CORS activation was prompted
+      showOutput(data);
+    });
+
+    document.getElementById('btnGold').addEventListener('click', async () => {
+      showLoading();
+      const data = await fetchAssetPrices('gold');
+      if (data === null) return; // Stop if CORS activation was prompted
+      showOutput(data);
+    });
+
+    document.getElementById('btnCoin').addEventListener('click', async () => {
+      showLoading();
+      const data = await fetchAssetPrices('coin');
+      if (data === null) return; // Stop if CORS activation was prompted
+      showOutput(data);
+    });
+
+    // --- Conversion Logic using SweetAlert ---
+    document.getElementById('btnConvert').addEventListener('click', async () => {
+      // Pre-fetch rates slightly ahead of showing the modal for faster calculation later
+      const ratesPromise = fetchCurrencyRatesForConversion();
+
+      // Prepare options for SweetAlert selects
+      const currencyOptions = currencies.reduce((acc, cur) => {
+        acc[cur.code] = `${cur.title} (${cur.code.toUpperCase()})`;
+        return acc;
+      }, {});
+
+      const { value: formValues } = await Swal.fire({
+        title: 'تبدیل ارز 💱',
+        html:
+          `<label for="swal-input-amount" style="display: block; text-align: right; margin-bottom: 5px;">مقدار:</label>` +
+          '<input id="swal-input-amount" class="swal2-input" placeholder="مقدار عددی وارد کنید" type="number" min="0" style="width: 95%; margin-bottom: 10px;">' +
+          `<label for="swal-select-source" style="display: block; text-align: right; margin-bottom: 5px;">از ارز:</label>` +
+          '<select id="swal-select-source" class="swal2-select" style="width: 95%; margin-bottom: 10px;"></select>' +
+          `<label for="swal-select-target" style="display: block; text-align: right; margin-bottom: 5px;">به ارز:</label>` +
+          '<select id="swal-select-target" class="swal2-select" style="width: 95%;"></select>',
+        focusConfirm: false,
+        confirmButtonText: 'محاسبه',
+        showCancelButton: true,
+        cancelButtonText: 'انصراف',
+        didOpen: () => {
+          const amountInput = document.getElementById('swal-input-amount');
+          const sourceSelect = document.getElementById('swal-select-source');
+          const targetSelect = document.getElementById('swal-select-target');
+
+          // Populate selects
+          for (const code in currencyOptions) {
+            sourceSelect.add(new Option(currencyOptions[code], code));
+            targetSelect.add(new Option(currencyOptions[code], code));
+          }
+          // Set defaults (e.g., USD to EUR)
+          sourceSelect.value = 'usd';
+          targetSelect.value = 'eur';
+
+          amountInput.onkeyup = (event) => event.key === 'Enter' && Swal.clickConfirm();
+        },
+        preConfirm: () => {
+          return {
+            amount: document.getElementById('swal-input-amount').value,
+            source: document.getElementById('swal-select-source').value,
+            target: document.getElementById('swal-select-target').value
+          };
+        }
+      });
+
+      if (formValues) {
+        const { amount, source, target } = formValues;
+        const numericAmount = parseFloat(amount);
+
+        if (isNaN(numericAmount) || numericAmount <= 0 || !source || !target) {
+          Swal.fire({
+            icon: 'error',
+            title: 'ورودی نامعتبر',
+            text: 'لطفاً مقدار عددی معتبر و هر دو ارز مبدا و مقصد را انتخاب کنید.',
+          });
+          return;
+        }
+
+        Swal.showLoading(); // Show loading indicator on the confirm button
+
+        const rates = await ratesPromise; // Get the pre-fetched rates
+
+        if (rates === null) { // Check if CORS prompt interrupted rate fetching
+          Swal.fire({
+            icon: 'info',
+            title: 'نیاز به فعال‌سازی',
+            text: 'لطفا ابتدا دسترسی به سرور کمکی را فعال کنید و سپس دوباره تبدیل ارز را امتحان کنید.',
+          });
+          return;
+        }
+
+        if (rates[source] === null || rates[target] === null) {
+          Swal.fire({
+            icon: 'error',
+            title: 'خطا در دریافت نرخ',
+            text: 'متاسفانه نرخ یک یا هر دو ارز دریافت نشد. لطفا دقایقی دیگر تلاش کنید.',
+          });
+          return;
+        }
+        if (rates[target] === 0) {
+          Swal.fire({ icon: 'error', title: 'خطا', text: 'نرخ ارز مقصد صفر است، امکان محاسبه وجود ندارد.' });
+          return;
+        }
+
+        const result = (numericAmount * rates[source]) / rates[target];
+        const targetCurrencyInfo = currencies.find(c => c.code === target);
+        const sourceCurrencyInfo = currencies.find(c => c.code === source);
+
+        // Format the result clearly
+        const formattedAmount = numericAmount.toLocaleString('fa-IR');
+        const formattedResult = result.toLocaleString('fa-IR', { maximumFractionDigits: 2 }); // Limit decimals
+
+        Swal.fire({
+          icon: 'success',
+          title: 'نتیجه تبدیل',
+          html: `
+            <div style="text-align: center; font-size: 1.1em; margin-top: 15px;">
+              <strong>${formattedAmount}</strong> ${sourceCurrencyInfo?.title || source.toUpperCase()}
+              <br>برابر است با<br>
+              <strong>${formattedResult}</strong> ${targetCurrencyInfo?.title || target.toUpperCase()}
+            </div>
+          `,
+          confirmButtonText: 'فهمیدم'
+        });
+      }
+    });
+
+    // --- Date/Time Update ---
+    function updateDateTime() {
+      try {
+        const now = new Date();
+        const persianDate = now.toLocaleDateString('fa-IR-u-nu-latn', {
+          timeZone: 'Asia/Tehran', year: 'numeric', month: 'long', day: 'numeric' // Use long month name
+        });
+
+        const time = now.toLocaleTimeString('fa-IR-u-nu-latn', {
+          timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', hour12: false
+        });
+
+        updateEl.textContent = `آخرین بروزرسانی: ${persianDate} - ${time}`;
+      } catch (e) {
+        console.error("Error updating date/time:", e);
+        updateEl.textContent = "خطا در بروزرسانی زمان";
+      }
+    }
+
+    // Initial call and interval
+    updateDateTime();
+    setInterval(updateDateTime, 30000);
+
+    console.log("Chand Web App Initialized (Dark Mode).");
+  </script>
+</body>
+</html>
